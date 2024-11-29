@@ -2,19 +2,24 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS = credentials('docker credentials')  // Docker Hub credentials
-        AWS_REGION = 'us-east-1'  // AWS region
-        CLUSTER_NAME = 'my-eks-cluster'  // EKS cluster name
-        AWS_ACCOUNT_ID = '575108934554'  // Your AWS account ID
-        ECR_REPO = 'my-repository'  // Your ECR repository name
+        AWS_REGION = 'us-east-1'               // AWS region
+        CLUSTER_NAME = 'my-eks-cluster'       // EKS cluster name
+        AWS_ACCOUNT_ID = '575108934554'       // Your AWS account ID
+        ECR_REPO_BACKEND = '3tier-nodejs-backend'  // ECR repository for backend
+        ECR_REPO_FRONTEND = '3tier-nodejs-frontend' // ECR repository for frontend
+        ECR_REPO_MONGO = 'mongo'              // ECR repository for MongoDB
+        AWS_CREDENTIALS_ID = 'AWS Credentials' // Replace with your Jenkins AWS credentials ID
+        DOCKER_WORKDIR = 'Docker/3tier-nodejs' // Docker compose working directory
     }
 
     stages {
-        stage('Configure Kubeconfig') {
+        stage('Configure AWS and Kubeconfig') {
             steps {
                 script {
-                    // Ensure AWS CLI is installed and AWS credentials are configured
-                    sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}"
+                    echo "Configuring AWS credentials and kubeconfig for EKS cluster..."
+                    withCredentials([aws(credentialsId: AWS_CREDENTIALS_ID, region: AWS_REGION)]) {
+                        sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}"
+                    }
                 }
             }
         }
@@ -22,12 +27,9 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    echo "Authenticating Docker to AWS ECR..."
-                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com "
-
                     echo "Building Docker images..."
                     sh '''
-                        cd Docker/3tier-nodejs/
+                        cd ${DOCKER_WORKDIR}
                         docker-compose build
                     '''
                 }
@@ -37,19 +39,21 @@ pipeline {
         stage('Push to AWS ECR') {
             steps {
                 script {
+                    echo "Authenticating Docker to AWS ECR..."
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
                     echo "Tagging Docker images for ECR..."
                     sh '''
-                        docker tag 3tier-nodejs-backend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:3tier-nodejs-backend
-                        docker tag 3tier-nodejs-frontend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:3tier-nodejs-frontend
-                        docker tag mongo:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:mongo
+                        docker tag backend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_BACKEND}
+                        docker tag frontend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_FRONTEND}
+                        docker tag mongo:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_MONGO}
                     '''
 
                     echo "Pushing Docker images to ECR..."
                     sh '''
-                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:3tier-nodejs-backend
-                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:3tier-nodejs-frontend
-                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:mongo
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_BACKEND}
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_FRONTEND}
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_MONGO}
                     '''
                 }
             }
@@ -58,11 +62,11 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    echo "Deploying to EKS cluster..."
+                    echo "Deploying Kubernetes resources to EKS..."
                     sh '''
                         kubectl apply -f k8s/frontend.yml
                         kubectl apply -f k8s/backend.yml
-                        kubectl apply -f k8s/mongodb.yml
+                        kubectl apply -f k8s/mongo.yml
                         kubectl apply -f k8s/frontend-ingress.yml
                     '''
                 }
@@ -72,10 +76,10 @@ pipeline {
 
     post {
         success {
-            echo "Deployment was successful!"
+            echo "Pipeline executed successfully. Application deployed!"
         }
         failure {
-            echo "Deployment failed!"
+            echo "Pipeline execution failed. Please check the logs for errors."
         }
     }
 }
