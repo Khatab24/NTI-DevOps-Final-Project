@@ -22,6 +22,9 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
+                    echo "Authenticating Docker to AWS ECR..."
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com "
+
                     echo "Building Docker images..."
                     sh '''
                         cd Docker/3tier-nodejs/
@@ -34,10 +37,6 @@ pipeline {
         stage('Push to AWS ECR') {
             steps {
                 script {
-                    echo "Authenticating Docker to AWS ECR..."
-                    sh '''
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                    '''
 
                     echo "Tagging Docker images for ECR..."
                     sh '''
