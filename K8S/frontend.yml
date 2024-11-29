@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 1  # You might want to scale this based on your requirements
+  selector:
+    matchLabels:
+      app: frontend  # Ensures this Deployment is linked to the correct Service
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: 575108934554.dkr.ecr.us-east-1.amazonaws.com/my-repository:3tier-nodejs-frontend  # Updated to ECR image URL
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REACT_APP_API_URL
+          value: http://backend-service:3001/api  # Replace with the correct URL for your backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  labels:
+    app: frontend
+spec:
+  selector:
+    app: frontend   # Make sure this matches your frontend deployment label
+  ports:
+    - protocol: TCP
+      port: 80        # Expose the service on port 80 (this is the external port for the ALB)
+      targetPort: 3000 # The actual port your application is listening on inside the pod
+  type: ClusterIP     # Exposing the service inside the cluster

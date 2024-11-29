@@ -1,34 +1,34 @@
-data "aws_s3_bucket" "alb_logs" {
-  bucket = "myteraformstate"
-}
+# data "aws_s3_bucket" "alb_logs" {
+#   bucket = "myteraformstate"
+# }
 
-resource "aws_s3_bucket_policy" "alb_logs_policy" {
-  bucket = data.aws_s3_bucket.alb_logs.id
+# resource "aws_s3_bucket_policy" "alb_logs_policy" {
+#   bucket = data.aws_s3_bucket.alb_logs.id
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "AWSLogDeliveryWrite",
-        Effect = "Allow",
-        Principal = {
-          Service = "elasticloadbalancing.amazonaws.com"
-        },
-        Action   = "s3:PutObject",
-        Resource = "${data.aws_s3_bucket.alb_logs.arn}/*"
-      },
-      {
-        Sid       = "AllowBucketAccess",
-        Effect    = "Allow",
-        Principal = "*",
-        Action    = "s3:GetBucketAcl",
-        Resource  = data.aws_s3_bucket.alb_logs.arn
-      }
-    ]
-  })
-}
-
-
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Sid    = "AWSLogDeliveryWrite",
+#         Effect = "Allow",
+#         Principal = {
+#           Service = "elasticloadbalancing.amazonaws.com"
+#         },
+#         Action   = "s3:PutObject",
+#         Resource = "${data.aws_s3_bucket.alb_logs.arn}/*"
+#       },
+#       {
+#         Sid       = "AllowELBAccess",
+#         Effect    = "Allow",
+#         Principal = {
+#           Service = "elasticloadbalancing.amazonaws.com"
+#         },
+#         Action    = "s3:GetBucketAcl",
+#         Resource  = data.aws_s3_bucket.alb_logs.arn
+#       }
+#     ]
+#   })
+# }
 
 resource "aws_lb" "eks_lb" {
   name               = "eks-load-balancer"
@@ -36,14 +36,12 @@ resource "aws_lb" "eks_lb" {
   security_groups    = [aws_security_group.sg.id]
   subnets            = [aws_subnet.subnet-1.id, aws_subnet.subnet-2.id]
 
-  access_logs {
-    bucket  = data.aws_s3_bucket.alb_logs.bucket 
-    enabled = true
-    prefix  = "alb-logs/" 
-  }
+  # access_logs {
+  #   bucket  = data.aws_s3_bucket.alb_logs.id # Reference the bucket dynamically
+  #   enabled = true
+  #   prefix  = "alb-logs" # Ensure no leading or trailing slash
+  # }
 }
-
-
 
 
 

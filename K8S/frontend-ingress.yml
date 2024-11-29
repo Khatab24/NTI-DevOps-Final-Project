@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing    # ALB is internet-facing
+    alb.ingress.kubernetes.io/target-type: ip             # Use IP-based targets (can also use 'instance')
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'  # Expose HTTP traffic on port 80
+spec:
+  rules:
+    - host: "eks-load-balancer-368850420.us-east-1.elb.amazonaws.com"  # Replace with your ALB DNS name
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service   # Must match your frontend service name
+                port:
+                  number: 80             # Must match the external service port
