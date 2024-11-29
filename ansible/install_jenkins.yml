@@ -1,0 +1,55 @@
+---
+- name: Install Jenkins
+  hosts: jenkins
+  become: yes
+  tasks:
+
+    - name: Update apt package cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Fontconfig and OpenJDK 17
+      ansible.builtin.apt:
+        name:
+          - fontconfig
+          - openjdk-17-jre
+        state: present
+
+    - name: Verify Java installation
+      ansible.builtin.command: java -version
+      register: java_version
+      ignore_errors: no
+
+    - name: Display Java version output
+      ansible.builtin.debug:
+        msg: "{{ java_version.stdout_lines }}"
+
+    - name: Download Jenkins GPG key
+      ansible.builtin.command:
+        cmd: wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      args:
+        creates: /usr/share/keyrings/jenkins-keyring.asc
+
+    - name: Add Jenkins repository
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list.d/jenkins.list
+        line: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        create: yes
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Jenkins
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+
+    - name: Start and enable Jenkins service
+      ansible.builtin.systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+
+
