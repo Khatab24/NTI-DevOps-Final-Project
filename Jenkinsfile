@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'               // AWS region
-        CLUSTER_NAME = 'my-eks-cluster'       // EKS cluster name
-        AWS_ACCOUNT_ID = '575108934554'       // Your AWS account ID
-        ECR_REPO_BACKEND = '3tier-nodejs-backend'  // ECR repository for backend
-        ECR_REPO_FRONTEND = '3tier-nodejs-frontend' // ECR repository for frontend
-        ECR_REPO_MONGO = 'mongo'              // ECR repository for MongoDB
-        AWS_CREDENTIALS_ID = 'AWS Credentials' // Replace with your Jenkins AWS credentials ID
-        DOCKER_WORKDIR = 'Docker/3tier-nodejs' // Docker compose working directory
+        AWS_REGION = 'us-east-1'
+        CLUSTER_NAME = 'my-eks-cluster'
+        AWS_ACCOUNT_ID = '575108934554'
+        ECR_REPO_BACKEND = '3tier-nodejs-backend'
+        ECR_REPO_FRONTEND = '3tier-nodejs-frontend'
+        ECR_REPO_MONGO = 'mongo'
+        AWS_CREDENTIALS_ID = 'AWS Credentials'
+        DOCKER_WORKDIR = 'Docker/3tier-nodejs'
     }
 
     stages {
@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     echo "Configuring AWS credentials and kubeconfig for EKS cluster..."
-                    withCredentials([aws(credentialsId: AWS_CREDENTIALS_ID, region: AWS_REGION)]) {
+                    withAWS(region: AWS_REGION, credentials: AWS_CREDENTIALS_ID) {
                         sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}"
                     }
                 }
