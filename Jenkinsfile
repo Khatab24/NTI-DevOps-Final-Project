@@ -64,7 +64,7 @@ pipeline {
                     sh '''
                         kubectl apply -f K8S/frontend.yml
                         kubectl apply -f K8S/backend.yml
-                        kubectl apply -f K8S/mongo.yml
+                        kubectl apply -f K8S/mongodb.yml
                         kubectl apply -f K8S/frontend-ingress.yml
                     '''
                 }
