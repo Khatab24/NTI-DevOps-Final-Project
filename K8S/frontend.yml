@@ -14,12 +14,12 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 575108934554.dkr.ecr.us-east-1.amazonaws.com/my-repository:3tier-nodejs-frontend  # Updated to ECR image URL
+        image: 575108934554.dkr.ecr.us-east-1.amazonaws.com/my-repository:frontend-latest  # Correct ECR image URL
         ports:
         - containerPort: 3000
         env:
         - name: REACT_APP_API_URL
-          value: http://backend-service:3001/api  # Replace with the correct URL for your backend
+          value: http://backend-service:3001/api  # Ensure this URL points to your backend service
 ---
 apiVersion: v1
 kind: Service
