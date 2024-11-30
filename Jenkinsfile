@@ -63,10 +63,10 @@ pipeline {
                 script {
                     echo "Deploying Kubernetes resources to EKS..."
                     sh '''
-                        kubectl apply -f k8s/frontend.yml
-                        kubectl apply -f k8s/backend.yml
-                        kubectl apply -f k8s/mongo.yml
-                        kubectl apply -f k8s/frontend-ingress.yml
+                        kubectl apply -f K8S/frontend.yml
+                        kubectl apply -f K8S/backend.yml
+                        kubectl apply -f K8S/mongo.yml
+                        kubectl apply -f K8S/frontend-ingress.yml
                     '''
                 }
             }
