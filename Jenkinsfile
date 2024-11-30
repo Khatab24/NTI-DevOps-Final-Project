@@ -8,7 +8,7 @@ pipeline {
         ECR_REPO = 'my-repository'
         AWS_CREDENTIALS_ID = 'AWS'
         DOCKER_WORKDIR = 'Docker/3tier-nodejs'
-        KUBECONFIG = '/home/ubuntu/kubeconfig'
+        KUBECONFIG = credentials('kubeconfig')
     }
 
     stages {
@@ -17,7 +17,7 @@ pipeline {
                 script {
                     echo "Configuring AWS credentials and kubeconfig for EKS cluster..."
                     withAWS(region: AWS_REGION, credentials: AWS_CREDENTIALS_ID) {
-                        sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME} --kubeconfig ${KUBECONFIG}"
+                        sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME} "
                     }
                 }
             }
