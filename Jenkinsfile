@@ -5,9 +5,9 @@ pipeline {
         AWS_REGION = 'us-east-1'
         CLUSTER_NAME = 'my-eks-cluster'
         AWS_ACCOUNT_ID = '575108934554'
-        ECR_REPO_BACKEND = '3tier-nodejs-backend'
-        ECR_REPO_FRONTEND = '3tier-nodejs-frontend'
-        ECR_REPO_MONGO = 'mongo'
+        ECR_REPO_BACKEND = '3tier-nodejs-frontend:latest'
+        ECR_REPO_FRONTEND = '3tier-nodejs-frontend:latest'
+        ECR_REPO_MONGO = 'mongo:latest'
         AWS_CREDENTIALS_ID = 'AWS'
         DOCKER_WORKDIR = 'Docker/3tier-nodejs'
     }
@@ -50,6 +50,7 @@ pipeline {
 
                     echo "Pushing Docker images to ECR..."
                     sh '''
+                        
                         docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_BACKEND}
                         docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_FRONTEND}
                         docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_MONGO}
