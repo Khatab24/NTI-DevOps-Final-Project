@@ -30,8 +30,7 @@ pipeline {
                     echo "Building Docker images..."
                     sh '''
                         cd ${DOCKER_WORKDIR}
-                        docker-compose build
-                    '''
+                        docker compose up -d                    '''
                 }
             }
         }
