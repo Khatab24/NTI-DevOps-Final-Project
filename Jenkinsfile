@@ -17,7 +17,7 @@ pipeline {
                 script {
                     echo "Configuring AWS credentials and kubeconfig for EKS cluster..."
                     withAWS(region: AWS_REGION, credentials: AWS_CREDENTIALS_ID) {
-                        sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}"
+                        sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME} --kubeconfig ${KUBECONFIG}"
                     }
                 }
             }
