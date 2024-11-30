@@ -8,7 +8,7 @@ pipeline {
         ECR_REPO_BACKEND = '3tier-nodejs-backend'
         ECR_REPO_FRONTEND = '3tier-nodejs-frontend'
         ECR_REPO_MONGO = 'mongo'
-        AWS_CREDENTIALS_ID = 'AWS Credentials'
+        AWS_CREDENTIALS_ID = 'AWS'
         DOCKER_WORKDIR = 'Docker/3tier-nodejs'
     }
 
