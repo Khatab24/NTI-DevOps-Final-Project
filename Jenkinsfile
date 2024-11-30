@@ -5,9 +5,7 @@ pipeline {
         AWS_REGION = 'us-east-1'
         CLUSTER_NAME = 'my-eks-cluster'
         AWS_ACCOUNT_ID = '575108934554'
-        ECR_REPO_BACKEND = '3tier-nodejs-frontend'
-        ECR_REPO_FRONTEND = '3tier-nodejs-frontend'
-        ECR_REPO_MONGO = 'mongo'
+        ECR_REPO = 'my-repository'
         AWS_CREDENTIALS_ID = 'AWS'
         DOCKER_WORKDIR = 'Docker/3tier-nodejs'
     }
@@ -30,7 +28,8 @@ pipeline {
                     echo "Building Docker images..."
                     sh '''
                         cd ${DOCKER_WORKDIR}
-                        docker compose up -d                    '''
+                        docker compose up -d
+                    '''
                 }
             }
         }
@@ -43,17 +42,16 @@ pipeline {
 
                     echo "Tagging Docker images for ECR..."
                     sh '''
-                        docker tag 3tier-nodejs-backend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_BACKEND}:latest
-                        docker tag 3tier-nodejs-frontend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_FRONTEND}:latest
-                        docker tag mongo:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_MONGO}:latest
+                        docker tag 3tier-nodejs-backend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:backend-latest
+                        docker tag 3tier-nodejs-frontend:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:frontend-latest
+                        docker tag mongo:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:mongo-latest
                     '''
 
                     echo "Pushing Docker images to ECR..."
                     sh '''
-                        
-                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_BACKEND}:latest
-                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_FRONTEND}:latest
-                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_MONGO}:latest
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:backend-latest
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:frontend-latest
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:mongo-latest
                     '''
                 }
             }
