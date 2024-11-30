@@ -8,6 +8,7 @@ pipeline {
         ECR_REPO = 'my-repository'
         AWS_CREDENTIALS_ID = 'AWS'
         DOCKER_WORKDIR = 'Docker/3tier-nodejs'
+        KUBECONFIG = '/home/ubuntu/kubeconfig'
     }
 
     stages {
@@ -62,10 +63,10 @@ pipeline {
                 script {
                     echo "Deploying Kubernetes resources to EKS..."
                     sh '''
-                        kubectl apply -f K8S/frontend.yml --validate=false
-                        kubectl apply -f K8S/backend.yml --validate=false
-                        kubectl apply -f K8S/mongodb.yml --validate=false 
-                        kubectl apply -f K8S/frontend-ingress.yml --validate=false
+                        kubectl apply -f K8S/frontend.yml 
+                        kubectl apply -f K8S/backend.yml 
+                        kubectl apply -f K8S/mongodb.yml 
+                        kubectl apply -f K8S/frontend-ingress.yml 
                     '''
                 }
             }
