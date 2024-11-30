@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mongo
-        image: 575108934554.dkr.ecr.us-east-1.amazonaws.com/my-repository:mongo  # ECR MongoDB image
+        image: 575108934554.dkr.ecr.us-east-1.amazonaws.com/my-repository:mongo-latest  # Correct ECR MongoDB image URL
         ports:
         - containerPort: 27017
         volumeMounts:
